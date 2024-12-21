@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="../output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body class="h-screen flex items-center justify-center" style="background-color: #8282ff;">
+    <section class="w-full max-w-lg p-4">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <div class="mb-4">
+                <input type="text" placeholder="Add A New Task"
+                    class="w-full p-2 border border-indigo-500 rounded outline-none bg-green-50" id="taskInput">
+            </div>
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex space-x-2">
+                    <span class="cursor-pointer text-indigo-500 font-bold underline active" data-filter="all">All</span>
+                    <span class="cursor-pointer text-gray-700 hover:text-indigo-500"
+                        data-filter="pending">Pending</span>
+                    <span class="cursor-pointer text-gray-700 hover:text-indigo-500"
+                        data-filter="completed">Completed</span>
+                </div>
+                <button
+                    class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-300"
+                    id="clearButton">
+                    Clear
+                </button>
+            </div>
+            <hr class="mb-4">
+            <div>
+                <ul class="space-y-3 todos-list max-h-80 overflow-y-auto pr-4 mt-2"></ul>
+            </div>
+        </div>
+    </section>
+    <script>
+        const userTaskInput = document.querySelector("#taskInput");
+        const todosList = document.querySelector(".todos-list");
+        const filterButtons = document.querySelectorAll("span[data-filter]");
+        const clearButton = document.querySelector("#clearButton");
+
+        let todos = JSON.parse(localStorage.getItem("todoAppTasks")) || [];
+
+        // Render tasks based on the selected filter
+        function renderTodos(filter = "all") {
+            todosList.innerHTML = ""; // Clear the list
+            todos.forEach((todo, index) => {
+                if (filter === "completed" && todo.status !== "completed") return;
+                if (filter === "pending" && todo.status !== "pending") return;
+
+                const li = document.createElement("li");
+                li.className = "flex justify-between items-center p-2 border-b border-indigo-500";
+
+                li.innerHTML = `
+                    <div class="flex items-center w-full space-x-2">
+                        <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">
+                        <span class="todo-txt ${todo.status === "completed" ? "line-through text-gray-500" : ""} w-full break-words">${todo.task}</span>
+                    </div>
+                    <div class="icon-container space-x-2 flex items-center ml-4">
+                        <i class="fa-solid fa-pen-to-square text-indigo-500 cursor-pointer edit-ic" data-index="${index}"></i>
+                        <i class="fa-solid fa-trash text-red-500 cursor-pointer delete-ic" data-index="${index}"></i>
+                    </div>
+                `;
+                todosList.appendChild(li);
+            });
+        }
+
+        // Add a new task
+        userTaskInput.addEventListener("keyup", (event) => {
+            const userInput = userTaskInput.value.trim();
+            const editIndex = userTaskInput.dataset.editIndex;
+
+            if (event.key === "Enter" && userInput) {
+                if (editIndex !== undefined) {
+                    // Update existing task
+                    todos[editIndex].task = userInput;
+                    delete userTaskInput.dataset.editIndex; // Clear edit index
+                } else {
+                    // Add new task
+                    todos.push({ task: userInput, status: "pending" });
+                }
+
+                localStorage.setItem("todoAppTasks", JSON.stringify(todos));
+                userTaskInput.value = ""; // Clear input
+                renderTodos(document.querySelector("span.active").dataset.filter);
+            }
+        });
+
+        // Toggle task status (pending/completed)
+        todosList.addEventListener("change", (event) => {
+            if (event.target.type === "checkbox") {
+                const index = event.target.dataset.index;
+                todos[index].status = event.target.checked ? "completed" : "pending";
+                localStorage.setItem("todoAppTasks", JSON.stringify(todos));
+                renderTodos(document.querySelector("span.active").dataset.filter);
+            }
+        });
+
+        // Edit a task
+        todosList.addEventListener("click", (event) => {
+            if (event.target.classList.contains("edit-ic")) {
+                const index = event.target.dataset.index;
+                const task = todos[index].task;
+                userTaskInput.value = task; // Populate input with task
+                userTaskInput.focus();
+                userTaskInput.dataset.editIndex = index; // Store edit index
+            }
+        });
+
+        // Delete a task
+        todosList.addEventListener("click", (event) => {
+            if (event.target.classList.contains("delete-ic")) {
+                const index = event.target.dataset.index;
+                todos.splice(index, 1); // Remove task
+                localStorage.setItem("todoAppTasks", JSON.stringify(todos));
+                renderTodos(document.querySelector("span.active").dataset.filter);
+            }
+        });
+
+        // Clear all tasks
+        clearButton.addEventListener("click", () => {
+            todos = [];
+            localStorage.setItem("todoAppTasks", JSON.stringify(todos));
+            renderTodos("all");
+        });
+
+        // Filter tasks (all, pending, completed)
+        filterButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                document.querySelector("span.active").classList.remove("active", "text-indigo-500", "font-bold", "underline");
+                btn.classList.add("active", "text-indigo-500", "font-bold", "underline");
+                renderTodos(btn.dataset.filter);
+            });
+        });
+
+        // Initial rendering
+        renderTodos("all");
+    </script>
+</body>
+
+</html>
