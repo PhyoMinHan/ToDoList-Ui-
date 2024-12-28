@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <style>
+  <style> 
     .active {
       color: #2563eb;
       border-bottom: 2px solid #2563eb;
@@ -60,27 +60,28 @@
       </div>
     </div>
   </div>
-
-  <script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
     const userTaskInput = document.querySelector(".task-input");
     const todosList = document.querySelector(".todos-list");
     const filterButtons = document.querySelectorAll(".ctr-div span");
     const clearButton = document.querySelector(".clear-btn");
-
+  
     const deleteModal = document.getElementById("deleteModal");
     const cancelBtn = document.getElementById("cancelBtn");
     const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-
+  
     const clearAllModal = document.getElementById("clearAllModal");
     const cancelClearAllBtn = document.getElementById("cancelClearAllBtn");
     const confirmClearAllBtn = document.getElementById("confirmClearAllBtn");
-
+  
     let todos = JSON.parse(localStorage.getItem("todos-list")) || [];
     let deleteIndex = null;
-
+  
+    // Render tasks based on filter
     function renderTodos(filter = "all") {
       todosList.innerHTML = ""; // Clear the list first
-
+  
       // Check if there are no tasks
       if (todos.length === 0) {
         const li = document.createElement("li");
@@ -89,64 +90,69 @@
         todosList.appendChild(li);
         return; // Exit the function if no tasks
       }
-
+  
       // Render tasks if there are any
       todos.forEach((todo, index) => {
         if (filter === "completed" && todo.status !== "completed") return;
         if (filter === "pending" && todo.status !== "pending") return;
-
+  
         const li = document.createElement("li");
         li.className = "flex justify-between items-center border-b pb-2";
-
+  
         li.innerHTML = `
-      <label class="flex items-center space-x-2">
-        <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">
-        <span class="${todo.status === "completed" ? "line-through text-gray-500" : "text-gray-700"}">${todo.task}</span>
-      </label>
-      <div class="flex space-x-2">
-        <i class="fa-solid fa-pen-to-square text-blue-500 cursor-pointer" data-index="${index}"></i>
-        <i class="fa-solid fa-trash text-red-500 cursor-pointer" data-index="${index}"></i>
-      </div>
-    `;
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">
+            <span class="${todo.status === "completed" ? "line-through text-gray-500" : "text-gray-700"}">${todo.task}</span>
+          </label>
+          <div class="flex space-x-2">
+            <i class="fa-solid fa-pen-to-square text-blue-500 cursor-pointer" data-index="${index}"></i>
+            <i class="fa-solid fa-trash text-red-500 cursor-pointer" data-index="${index}"></i>
+          </div>
+        `;
         todosList.appendChild(li);
       });
     }
-
-
     userTaskInput.addEventListener("keyup", (event) => {
-      const userInput = userTaskInput.value.trim();
-      const editIndex = userTaskInput.dataset.editIndex;
+  const userInput = userTaskInput.value.trim();
+  const editIndex = userTaskInput.dataset.editIndex;
 
-      if (event.key === "Enter" && userInput) {
-        if (editIndex !== undefined) {
-          todos[editIndex].task = userInput;
+  if (event.key === "Enter" && userInput) {
+    if (editIndex !== undefined) {
+      todos[editIndex].task = userInput;
 
-          // Reset opacity after editing
-          const todoItem = todosList.querySelector(`li:nth-child(${parseInt(editIndex) + 1})`);
-          const todoText = todoItem.querySelector("span");
-          todoText.style.opacity = "1";
+      // Reset opacity after editing
+      const todoItem = todosList.querySelector(`li:nth-child(${parseInt(editIndex) + 1})`);
+      const todoText = todoItem.querySelector("span");
+      todoText.style.opacity = "1";
 
-          delete userTaskInput.dataset.editIndex;
-          enableControls();
-        } else {
-          todos.push({ task: userInput, status: "pending" });
-        }
+      delete userTaskInput.dataset.editIndex;  // Reset the editIndex
+      enableControls();
+    } else {
+      todos.push({ task: userInput, status: "pending" });
+    }
 
-        localStorage.setItem("todos-list", JSON.stringify(todos));
-        userTaskInput.value = "";
-        renderTodos(document.querySelector(".ctr-div span.active").dataset.filter);
-      }
-    });
+    localStorage.setItem("todos-list", JSON.stringify(todos));
+    userTaskInput.value = "";
 
+    // Preserve the current filter
+    const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
+    renderTodos(activeFilter);
+  }
+});
+
+    // Handle checkbox change (mark task as completed or pending)
     todosList.addEventListener("change", (event) => {
       if (event.target.type === "checkbox") {
         const index = event.target.dataset.index;
         todos[index].status = event.target.checked ? "completed" : "pending";
         localStorage.setItem("todos-list", JSON.stringify(todos));
-        renderTodos(document.querySelector(".ctr-div span.active").dataset.filter);
+  
+        const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
+        renderTodos(activeFilter);
       }
     });
-
+  
+    // Handle task edit and delete
     todosList.addEventListener("click", (event) => {
       if (event.target.classList.contains("fa-pen-to-square")) {
         const index = event.target.dataset.index;
@@ -154,59 +160,66 @@
         userTaskInput.focus();
         userTaskInput.dataset.editIndex = index;
         disableControls();
-
+  
         // Reduce opacity of the text
         const todoItem = event.target.closest("li");
         const todoText = todoItem.querySelector("span");
         todoText.style.opacity = "0.5";
       }
-
+  
       if (event.target.classList.contains("fa-trash")) {
         deleteIndex = event.target.dataset.index;
         deleteModal.style.display = "flex";
       }
     });
-
+  
+    // Handle delete confirmation
     cancelBtn.addEventListener("click", () => {
       deleteModal.style.display = "none";
       deleteIndex = null;
     });
-
+  
     confirmDeleteBtn.addEventListener("click", () => {
       if (deleteIndex !== null) {
         todos.splice(deleteIndex, 1);
         localStorage.setItem("todos-list", JSON.stringify(todos));
-        renderTodos(document.querySelector(".ctr-div span.active").dataset.filter);
+        const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
+        renderTodos(activeFilter);
         deleteIndex = null;
       }
       deleteModal.style.display = "none";
     });
-
+  
+    // Handle clear all tasks
     clearButton.addEventListener("click", () => {
       clearAllModal.style.display = "flex";  // Show Clear All confirmation modal
     });
-
+  
     cancelClearAllBtn.addEventListener("click", () => {
       clearAllModal.style.display = "none";  // Close modal
     });
-
+  
     confirmClearAllBtn.addEventListener("click", () => {
       todos = [];  // Clear all tasks
       localStorage.setItem("todos-list", JSON.stringify(todos));
       renderTodos();  // Re-render empty list
       clearAllModal.style.display = "none";  // Close modal
     });
-
+  
+    // Handle filter change
     filterButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelector(".ctr-div span.active").classList.remove("active");
         btn.classList.add("active");
-        renderTodos(btn.dataset.filter);
+  
+        // Preserve the current filter and re-render
+        const activeFilter = btn.dataset.filter;
+        renderTodos(activeFilter);
       });
     });
-
+  
+    // Disable controls (checkboxes, delete buttons, and filter buttons)
     function disableControls() {
-      // Disable checkbox and delete buttons
       todosList.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
         checkbox.disabled = true;
       });
@@ -214,16 +227,15 @@
         icon.style.pointerEvents = "none";
         icon.style.opacity = "0.5";
       });
-
-      // Disable filter buttons
+  
       filterButtons.forEach((btn) => {
         btn.style.pointerEvents = "none";
         btn.style.opacity = "0.5";
       });
     }
-
+  
+    // Enable controls (checkboxes, delete buttons, and filter buttons)
     function enableControls() {
-      // Enable checkbox and delete buttons
       todosList.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
         checkbox.disabled = false;
       });
@@ -231,16 +243,17 @@
         icon.style.pointerEvents = "auto";
         icon.style.opacity = "1";
       });
-
-      // Enable filter buttons
+  
       filterButtons.forEach((btn) => {
         btn.style.pointerEvents = "auto";
         btn.style.opacity = "1";
       });
     }
-
+  
+    // Initial rendering
     renderTodos();
-  </script>
+  });
+</script>
 </body>
 
 </html>
