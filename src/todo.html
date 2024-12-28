@@ -70,7 +70,7 @@
             });
         }
 
-        // Add a new task
+        // Add a new task or complete editing
         userTaskInput.addEventListener("keyup", (event) => {
             const userInput = userTaskInput.value.trim();
             const editIndex = userTaskInput.dataset.editIndex;
@@ -88,6 +88,14 @@
                 localStorage.setItem("todoAppTasks", JSON.stringify(todos));
                 userTaskInput.value = ""; // Clear input
                 renderTodos(document.querySelector("span.active").dataset.filter);
+
+                // Show delete icons and enable checkboxes after editing
+                document.querySelectorAll(".delete-ic").forEach((icon) => {
+                    icon.style.display = "inline";
+                });
+                document.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
+                    checkbox.disabled = false;
+                });
             }
         });
 
@@ -109,6 +117,14 @@
                 userTaskInput.value = task; // Populate input with task
                 userTaskInput.focus();
                 userTaskInput.dataset.editIndex = index; // Store edit index
+
+                // Hide delete icons and disable checkboxes while editing
+                document.querySelectorAll(".delete-ic").forEach((icon) => {
+                    icon.style.display = "none";
+                });
+                document.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
+                    checkbox.disabled = true;
+                });
             }
         });
 
