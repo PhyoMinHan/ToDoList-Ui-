@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Todo List</title>
-  <link rel="stylesheet" href="../output.css">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -79,40 +79,37 @@
     let deleteIndex = null;
 
     function renderTodos(filter = "all") {
-      todosList.innerHTML = "";
+      todosList.innerHTML = ""; // Clear the list first
 
-      // Filter tasks based on status
-      let filteredTodos = todos.filter(todo => {
-        if (filter === "completed") return todo.status === "completed";
-        if (filter === "pending") return todo.status === "pending";
-        return true; // "all" filter shows all tasks
-      });
-
-      // If no tasks match the filter, show a "No tasks to display" message
-      if (filteredTodos.length === 0) {
+      // Check if there are no tasks
+      if (todos.length === 0) {
         const li = document.createElement("li");
-        li.className = "text-center mt-16 text-gray-500";
-        li.textContent = "No tasks to display.";
+        li.className = "text-center text-gray-500 mt-20"; // Styling the empty message
+        li.innerHTML = "No tasks available."; // The message to display
         todosList.appendChild(li);
-      } else {
-        // Render filtered tasks
-        filteredTodos.forEach((todo, index) => {
-          const li = document.createElement("li");
-          li.className = "flex justify-between items-center border-b pb-2";
-
-          li.innerHTML = `
-        <label class="flex items-center space-x-2">
-          <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">
-          <span class="${todo.status === "completed" ? "line-through text-gray-500" : "text-gray-700"}">${todo.task}</span>
-        </label>
-        <div class="flex space-x-2">
-          <i class="fa-solid fa-pen-to-square text-blue-500 cursor-pointer" data-index="${index}"></i>
-          <i class="fa-solid fa-trash text-red-500 cursor-pointer" data-index="${index}"></i>
-        </div>
-      `;
-          todosList.appendChild(li);
-        });
+        return; // Exit the function if no tasks
       }
+
+      // Render tasks if there are any
+      todos.forEach((todo, index) => {
+        if (filter === "completed" && todo.status !== "completed") return;
+        if (filter === "pending" && todo.status !== "pending") return;
+
+        const li = document.createElement("li");
+        li.className = "flex justify-between items-center border-b pb-2";
+
+        li.innerHTML = `
+      <label class="flex items-center space-x-2">
+        <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">
+        <span class="${todo.status === "completed" ? "line-through text-gray-500" : "text-gray-700"}">${todo.task}</span>
+      </label>
+      <div class="flex space-x-2">
+        <i class="fa-solid fa-pen-to-square text-blue-500 cursor-pointer" data-index="${index}"></i>
+        <i class="fa-solid fa-trash text-red-500 cursor-pointer" data-index="${index}"></i>
+      </div>
+    `;
+        todosList.appendChild(li);
+      });
     }
 
 
