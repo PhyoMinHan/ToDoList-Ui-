@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body class="h-screen bg-blue-500 flex items-center justify-center">
+    <section class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md h-[90vh] overflow-y-auto">
+        <div class="mb-4">
+            <input type="text" placeholder="Add A New Task"
+                class="w-full h-10 px-4 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex space-x-2">
+                <span class="cursor-pointer text-gray-700 font-medium active:text-blue-500" data-filter="all">All</span>
+                <span class="cursor-pointer text-gray-700 font-medium" data-filter="pending">Pending</span>
+                <span class="cursor-pointer text-gray-700 font-medium" data-filter="completed">Completed</span>
+            </div>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 clear-btn">Clear</button>
+        </div>
+        <hr class="border-blue-300 mb-4">
+        <ul class="todos-list space-y-4"></ul>
+    </section>
+
+    <script>
+        const userTaskInput = document.querySelector("input[type='text']");
+        const todosList = document.querySelector(".todos-list");
+        const filterButtons = document.querySelectorAll("[data-filter]");
+        const clearButton = document.querySelector(".clear-btn");
+
+        let todos = JSON.parse(localStorage.getItem("todos-list")) || [];
+
+        function renderTodos(filter = "all") {
+            todosList.innerHTML = "";
+            todos.forEach((todo, index) => {
+                if (filter === "completed" && todo.status !== "completed") return;
+                if (filter === "pending" && todo.status !== "pending") return;
+
+                const li = document.createElement("li");
+                li.className = "flex justify-between items-center border-b pb-2";
+
+                li.innerHTML = `
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">
+                        <span class="${todo.status === "completed" ? "line-through text-gray-500" : "text-gray-700"}">${todo.task}</span>
+                    </label>
+                    <div class="flex space-x-2">
+                        <i class="fa-solid fa-pen-to-square text-blue-500 cursor-pointer" data-index="${index}"></i>
+                        <i class="fa-solid fa-trash text-red-500 cursor-pointer" data-index="${index}"></i>
+                    </div>
+                `;
+                todosList.appendChild(li);
+            });
+        }
+
+        userTaskInput.addEventListener("keyup", (event) => {
+            const userInput = userTaskInput.value.trim();
+            const editIndex = userTaskInput.dataset.editIndex;
+
+            if (event.key === "Enter" && userInput) {
+                if (editIndex !== undefined) {
+                    todos[editIndex].task = userInput;
+                    delete userTaskInput.dataset.editIndex;
+                } else {
+                    todos.push({ task: userInput, status: "pending" });
+                }
+
+                localStorage.setItem("todos-list", JSON.stringify(todos));
+                userTaskInput.value = "";
+                renderTodos(document.querySelector("[data-filter].text-blue-500")?.dataset.filter || "all");
+            }
+        });
+
+        todosList.addEventListener("change", (event) => {
+            if (event.target.type === "checkbox") {
+                const index = event.target.dataset.index;
+                todos[index].status = event.target.checked ? "completed" : "pending";
+                localStorage.setItem("todos-list", JSON.stringify(todos));
+                renderTodos(document.querySelector("[data-filter].text-blue-500")?.dataset.filter || "all");
+            }
+        });
+
+        todosList.addEventListener("click", (event) => {
+            const index = event.target.dataset.index;
+
+            if (event.target.classList.contains("fa-trash")) {
+                todos.splice(index, 1);
+                localStorage.setItem("todos-list", JSON.stringify(todos));
+                renderTodos(document.querySelector("[data-filter].text-blue-500")?.dataset.filter || "all");
+            }
+
+            if (event.target.classList.contains("fa-pen-to-square")) {
+                userTaskInput.value = todos[index].task;
+                userTaskInput.focus();
+                userTaskInput.dataset.editIndex = index;
+            }
+        });
+
+        clearButton.addEventListener("click", () => {
+            todos = [];
+            localStorage.setItem("todos-list", JSON.stringify(todos));
+            renderTodos();
+        });
+
+        filterButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                document.querySelector("[data-filter].text-blue-500")?.classList.remove("text-blue-500");
+                btn.classList.add("text-blue-500");
+                renderTodos(btn.dataset.filter);
+            });
+        });
+
+        renderTodos();
+    </script>
+</body>
+
+</html>

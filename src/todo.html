@@ -5,170 +5,240 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Todo List</title>
-  <link rel="stylesheet" href="../output.css">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    .active {
+      color: #2563eb;
+      border-bottom: 2px solid #2563eb;
+    }
+  </style>
 </head>
 
-<body class="h-screen flex items-center justify-center" style="background-color: #8282ff;">
-  <section class="w-full max-w-lg p-4">
-    <div class="bg-white p-6 rounded-lg shadow-lg">
-      <div class="mb-4">
-        <input type="text" placeholder="Add A New Task"
-          class="w-full p-2 border border-indigo-500 rounded outline-none bg-green-50" id="taskInput">
-      </div>
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex space-x-2">
-          <span class="cursor-pointer text-indigo-500 font-bold underline active" data-filter="all">All</span>
-          <span class="cursor-pointer text-gray-700 hover:text-indigo-500" data-filter="pending">Pending</span>
-          <span class="cursor-pointer text-gray-700 hover:text-indigo-500" data-filter="completed">Completed</span>
-        </div>
-        <button
-          class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-300"
-          id="clearButton">
-          Clear
-        </button>
-      </div>
-      <hr class="mb-4">
-      <div>
-        <ul class="space-y-3 todos-list max-h-80 overflow-x-hidden pr-4 mt-2"></ul>
-      </div>
+<body class="h-screen flex items-center justify-center" style="background: #8282ff;">
+  <section class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md h-[90vh] overflow-y-auto">
+    <div class="mb-4">
+      <input type="text" placeholder="Add A New Task" style="background-color: #e7f9f0;"
+        class="task-input w-full h-10 px-4 border border-blue-500 rounded outline-none">
     </div>
+    <div class="flex justify-between items-center mb-4 ctr-div">
+      <div class="flex space-x-2">
+        <span class="cursor-pointer text-gray-700 font-medium active" data-filter="all">All</span>
+        <span class="cursor-pointer text-gray-700 font-medium" data-filter="pending">Pending</span>
+        <span class="cursor-pointer text-gray-700 font-medium" data-filter="completed">Completed</span>
+      </div>
+      <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 clear-btn">Clear All</button>
+    </div>
+    <hr class="border-blue-300 mb-4">
+    <ul class="todos-list space-y-4"></ul>
   </section>
 
-  <!-- Custom Confirmation Modal --> 
-  <div id="confirmModal" class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50" 
-    style="display: none;">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center">
-      <p class="mb-4 text-lg text-red-600 font-bold">Are you sure you want to delete this task?</p>
-      <div class="flex justify-center space-x-4">
-        <button id="confirmDelete" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Yes</button>
-        <button id="cancelDelete" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">No</button>
+  <!-- Delete Confirmation Modal for individual task -->
+  <div id="deleteModal" style="display: none;" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+      <h2 class="text-lg font-semibold mb-4">Are you sure to delete?</h2>
+      <div class="flex justify-end space-x-4">
+        <button id="cancelBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+        <button id="confirmDeleteBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear All Confirmation Modal -->
+  <div id="clearAllModal" style="display: none;" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+      <h2 class="text-lg font-semibold mb-4">Are you sure to clear all tasks?</h2>
+      <div class="flex justify-end space-x-4">
+        <button id="cancelClearAllBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+        <button id="confirmClearAllBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Clear All</button>
       </div>
     </div>
   </div>
 
   <script>
-    const taskInput = document.querySelector("#taskInput");
+    const userTaskInput = document.querySelector(".task-input");
     const todosList = document.querySelector(".todos-list");
-    const filterButtons = document.querySelectorAll("span[data-filter]");
-    const clearButton = document.querySelector("#clearButton");
+    const filterButtons = document.querySelectorAll(".ctr-div span");
+    const clearButton = document.querySelector(".clear-btn");
 
-    let todos = JSON.parse(localStorage.getItem("todoAppTasks")) || [];
+    const deleteModal = document.getElementById("deleteModal");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+    const clearAllModal = document.getElementById("clearAllModal");
+    const cancelClearAllBtn = document.getElementById("cancelClearAllBtn");
+    const confirmClearAllBtn = document.getElementById("confirmClearAllBtn");
+
+    let todos = JSON.parse(localStorage.getItem("todos-list")) || [];
     let deleteIndex = null;
 
-    // Render tasks based on filter
     function renderTodos(filter = "all") {
-      todosList.innerHTML = "";
-      todos.forEach((todo, index) => {
-        if (filter === "completed" && todo.status !== "completed") return;
-        if (filter === "pending" && todo.status !== "pending") return;
+  todosList.innerHTML = "";
+  
+  // Filter tasks based on status
+  let filteredTodos = todos.filter(todo => {
+    if (filter === "completed") return todo.status === "completed";
+    if (filter === "pending") return todo.status === "pending";
+    return true; // "all" filter shows all tasks
+  });
 
-        const li = document.createElement("li");
-        li.className = "flex justify-between items-center p-2 border-b border-indigo-500";
-        li.innerHTML = `
-                    <div class="flex items-center w-full space-x-2">
-                        <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">
-                        <span class="todo-txt ${todo.status === "completed" ? "line-through text-gray-500" : ""} w-full break-words">${todo.task}</span>
-                    </div>
-                    <div class="icon-container space-x-2 ps-10 flex items-center ml-4">
-                        <i class="fa-solid fa-pen-to-square text-indigo-500 cursor-pointer edit-ic" data-index="${index}"></i>
-                        <i class="fa-solid fa-trash text-red-500 cursor-pointer delete-ic" data-index="${index}"></i>
-                    </div>
-                `;
-        todosList.appendChild(li);
-      });
-    }
+  // If no tasks match the filter, show a "No tasks to display" message
+  if (filteredTodos.length === 0) {
+    const li = document.createElement("li");
+    li.className = "text-center text-gray-500";
+    li.textContent = "No tasks to display.";
+    todosList.appendChild(li);
+  } else {
+    // Render filtered tasks
+    filteredTodos.forEach((todo, index) => {
+      const li = document.createElement("li");
+      li.className = "flex justify-between items-center border-b pb-2";
 
-    // Add or edit a task
-    taskInput.addEventListener("keyup", (event) => {
-      const inputText = taskInput.value.trim();
-      const editIndex = taskInput.dataset.editIndex;
+      li.innerHTML = `
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">
+          <span class="${todo.status === "completed" ? "line-through text-gray-500" : "text-gray-700"}">${todo.task}</span>
+        </label>
+        <div class="flex space-x-2">
+          <i class="fa-solid fa-pen-to-square text-blue-500 cursor-pointer" data-index="${index}"></i>
+          <i class="fa-solid fa-trash text-red-500 cursor-pointer" data-index="${index}"></i>
+        </div>
+      `;
+      todosList.appendChild(li);
+    });
+  }
+}
 
-      if (event.key === "Enter" && inputText) {
+
+    userTaskInput.addEventListener("keyup", (event) => {
+      const userInput = userTaskInput.value.trim();
+      const editIndex = userTaskInput.dataset.editIndex;
+
+      if (event.key === "Enter" && userInput) {
         if (editIndex !== undefined) {
-          todos[editIndex].task = inputText;
-          delete taskInput.dataset.editIndex;
+          todos[editIndex].task = userInput;
+
+          // Reset opacity after editing
+          const todoItem = todosList.querySelector(`li:nth-child(${parseInt(editIndex) + 1})`);
+          const todoText = todoItem.querySelector("span");
+          todoText.style.opacity = "1";
+
+          delete userTaskInput.dataset.editIndex;
+          enableControls();
         } else {
-          todos.push({ task: inputText, status: "pending" });
+          todos.push({ task: userInput, status: "pending" });
         }
 
-        localStorage.setItem("todoAppTasks", JSON.stringify(todos));
-        taskInput.value = "";
-        renderTodos(document.querySelector("span.active").dataset.filter);
+        localStorage.setItem("todos-list", JSON.stringify(todos));
+        userTaskInput.value = "";
+        renderTodos(document.querySelector(".ctr-div span.active").dataset.filter);
       }
     });
 
-    // Toggle task status
     todosList.addEventListener("change", (event) => {
       if (event.target.type === "checkbox") {
         const index = event.target.dataset.index;
         todos[index].status = event.target.checked ? "completed" : "pending";
-        localStorage.setItem("todoAppTasks", JSON.stringify(todos));
-        renderTodos(document.querySelector("span.active").dataset.filter);
+        localStorage.setItem("todos-list", JSON.stringify(todos));
+        renderTodos(document.querySelector(".ctr-div span.active").dataset.filter);
       }
     });
 
-    // Edit a task
     todosList.addEventListener("click", (event) => {
-      if (event.target.classList.contains("edit-ic")) {
+      if (event.target.classList.contains("fa-pen-to-square")) {
         const index = event.target.dataset.index;
+        userTaskInput.value = todos[index].task;
+        userTaskInput.focus();
+        userTaskInput.dataset.editIndex = index;
+        disableControls();
 
-        // Hide delete icon and disable checkbox while editing
-        const taskItem = event.target.closest("li");
-        taskItem.querySelector(".delete-ic").style.display = "none"; // Hide delete icon
-        taskItem.querySelector("input[type='checkbox']").disabled = true;
-        taskInput.value = todos[index].task;
-        taskInput.focus();
-        taskInput.dataset.editIndex = index;
+        // Reduce opacity of the text
+        const todoItem = event.target.closest("li");
+        const todoText = todoItem.querySelector("span");
+        todoText.style.opacity = "0.5";
       }
 
-      // Delete a task
-      if (event.target.classList.contains("delete-ic")) {
+      if (event.target.classList.contains("fa-trash")) {
         deleteIndex = event.target.dataset.index;
-
-        // Show custom confirmation modal
-        const confirmModal = document.getElementById("confirmModal");
-        confirmModal.style.display = "flex"; // Show modal
+        deleteModal.style.display = "flex";
       }
     });
 
-    // Handle confirmation modal actions
-    document.getElementById("confirmDelete").addEventListener("click", () => {
-      todos.splice(deleteIndex, 1);
-      localStorage.setItem("todoAppTasks", JSON.stringify(todos));
-      renderTodos(document.querySelector("span.active").dataset.filter);
-
-      // Hide the modal
-      const confirmModal = document.getElementById("confirmModal");
-      confirmModal.style.display = "none"; // Hide modal
+    cancelBtn.addEventListener("click", () => {
+      deleteModal.style.display = "none";
+      deleteIndex = null;
     });
 
-    document.getElementById("cancelDelete").addEventListener("click", () => {
-      // Hide the modal
-      const confirmModal = document.getElementById("confirmModal");
-      confirmModal.style.display = "none"; // Hide modal
+    confirmDeleteBtn.addEventListener("click", () => {
+      if (deleteIndex !== null) {
+        todos.splice(deleteIndex, 1);
+        localStorage.setItem("todos-list", JSON.stringify(todos));
+        renderTodos(document.querySelector(".ctr-div span.active").dataset.filter);
+        deleteIndex = null;
+      }
+      deleteModal.style.display = "none";
     });
 
-    // Clear all tasks
     clearButton.addEventListener("click", () => {
-      todos = [];
-      localStorage.setItem("todoAppTasks", JSON.stringify(todos));
-      renderTodos("all");
+      clearAllModal.style.display = "flex";  // Show Clear All confirmation modal
     });
 
-    // Filter tasks
+    cancelClearAllBtn.addEventListener("click", () => {
+      clearAllModal.style.display = "none";  // Close modal
+    });
+
+    confirmClearAllBtn.addEventListener("click", () => {
+      todos = [];  // Clear all tasks
+      localStorage.setItem("todos-list", JSON.stringify(todos));
+      renderTodos();  // Re-render empty list
+      clearAllModal.style.display = "none";  // Close modal
+    });
+
     filterButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
-        document.querySelector("span.active").classList.remove("active", "text-indigo-500", "font-bold", "underline");
-        btn.classList.add("active", "text-indigo-500", "font-bold", "underline");
+        document.querySelector(".ctr-div span.active").classList.remove("active");
+        btn.classList.add("active");
         renderTodos(btn.dataset.filter);
       });
     });
 
-    // Initial render
-    renderTodos("all");
+    function disableControls() {
+      // Disable checkbox and delete buttons
+      todosList.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
+        checkbox.disabled = true;
+      });
+      todosList.querySelectorAll(".fa-trash").forEach((icon) => {
+        icon.style.pointerEvents = "none";
+        icon.style.opacity = "0.5";
+      });
+
+      // Disable filter buttons
+      filterButtons.forEach((btn) => {
+        btn.style.pointerEvents = "none";
+        btn.style.opacity = "0.5";
+      });
+    }
+
+    function enableControls() {
+      // Enable checkbox and delete buttons
+      todosList.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
+        checkbox.disabled = false;
+      });
+      todosList.querySelectorAll(".fa-trash").forEach((icon) => {
+        icon.style.pointerEvents = "auto";
+        icon.style.opacity = "1";
+      });
+
+      // Enable filter buttons
+      filterButtons.forEach((btn) => {
+        btn.style.pointerEvents = "auto";
+        btn.style.opacity = "1";
+      });
+    }
+
+    renderTodos();
   </script>
 </body>
 
