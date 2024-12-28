@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Todo List</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../output.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -18,7 +18,7 @@
 </head>
 
 <body class="h-screen flex items-center justify-center" style="background: #8282ff;">
-  <section class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md h-[90vh] overflow-y-auto">
+  <section class="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md h-[50vh] overflow-y-auto">
     <div class="mb-4">
       <input type="text" placeholder="Add A New Task" style="background-color: #e7f9f0;"
         class="task-input w-full h-10 px-4 border border-blue-500 rounded outline-none">
@@ -36,7 +36,8 @@
   </section>
 
   <!-- Delete Confirmation Modal for individual task -->
-  <div id="deleteModal" style="display: none;" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div id="deleteModal" style="display: none;"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
       <h2 class="text-lg font-semibold mb-4">Are you sure to delete?</h2>
       <div class="flex justify-end space-x-4">
@@ -47,12 +48,15 @@
   </div>
 
   <!-- Clear All Confirmation Modal -->
-  <div id="clearAllModal" style="display: none;" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div id="clearAllModal" style="display: none;"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
       <h2 class="text-lg font-semibold mb-4">Are you sure to clear all tasks?</h2>
       <div class="flex justify-end space-x-4">
-        <button id="cancelClearAllBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
-        <button id="confirmClearAllBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Clear All</button>
+        <button id="cancelClearAllBtn"
+          class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+        <button id="confirmClearAllBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Clear
+          All</button>
       </div>
     </div>
   </div>
@@ -75,28 +79,28 @@
     let deleteIndex = null;
 
     function renderTodos(filter = "all") {
-  todosList.innerHTML = "";
-  
-  // Filter tasks based on status
-  let filteredTodos = todos.filter(todo => {
-    if (filter === "completed") return todo.status === "completed";
-    if (filter === "pending") return todo.status === "pending";
-    return true; // "all" filter shows all tasks
-  });
+      todosList.innerHTML = "";
 
-  // If no tasks match the filter, show a "No tasks to display" message
-  if (filteredTodos.length === 0) {
-    const li = document.createElement("li");
-    li.className = "text-center text-gray-500";
-    li.textContent = "No tasks to display.";
-    todosList.appendChild(li);
-  } else {
-    // Render filtered tasks
-    filteredTodos.forEach((todo, index) => {
-      const li = document.createElement("li");
-      li.className = "flex justify-between items-center border-b pb-2";
+      // Filter tasks based on status
+      let filteredTodos = todos.filter(todo => {
+        if (filter === "completed") return todo.status === "completed";
+        if (filter === "pending") return todo.status === "pending";
+        return true; // "all" filter shows all tasks
+      });
 
-      li.innerHTML = `
+      // If no tasks match the filter, show a "No tasks to display" message
+      if (filteredTodos.length === 0) {
+        const li = document.createElement("li");
+        li.className = "text-center mt-16 text-gray-500";
+        li.textContent = "No tasks to display.";
+        todosList.appendChild(li);
+      } else {
+        // Render filtered tasks
+        filteredTodos.forEach((todo, index) => {
+          const li = document.createElement("li");
+          li.className = "flex justify-between items-center border-b pb-2";
+
+          li.innerHTML = `
         <label class="flex items-center space-x-2">
           <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">
           <span class="${todo.status === "completed" ? "line-through text-gray-500" : "text-gray-700"}">${todo.task}</span>
@@ -106,10 +110,10 @@
           <i class="fa-solid fa-trash text-red-500 cursor-pointer" data-index="${index}"></i>
         </div>
       `;
-      todosList.appendChild(li);
-    });
-  }
-}
+          todosList.appendChild(li);
+        });
+      }
+    }
 
 
     userTaskInput.addEventListener("keyup", (event) => {

@@ -1,169 +1,168 @@
-/* #8282ff */
-@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+  /* #8282ff */
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 
-:root {
-  --primary: #8282ff;
-  --dark: #3b3530;
-  --white: #ffffff;
-  --danger: #f44336;
-}
+  :root {
+    --primary: #8282ff;
+    --dark: #3b3530;
+    --white: #ffffff;
+    --danger: #f44336;
+  }
 
-* {
-  font-family: "Roboto", sans-serif;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+  * {
+    font-family: "Roboto", sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-html,
-body {
-  height: 100%; /* Ensure full height */
-}
+  html,
+  body {
+    height: 100%; /* Ensure full height */
+  }
 
-section {
-  background-color: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%; /* Ensure section takes full height */
-}
+  section {
+    background-color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Ensure section takes full height */
+  }
 
-.todo-div {
-  background-color: var(--white);
-  padding: 10px 20px;
-  border-radius: 10px;
-  width: 100%;
-  max-width: 400px; /* Maximum width for large screens */
-  max-height: 90vh; /* Limit the height to avoid overflowing */
-  overflow-y: auto; /* Enable scrolling if content overflows */
-}
-
-.task-input {
-  height: 40px;
-}
-
-.task-input input {
-  width: 100%;
-  height: 100%;
-  border: 1px solid var(--primary);
-  outline: none;
-  background-color: #e7f9f0;
-  border-radius: 4px;
-  padding: 0 0 0 20px;
-}
-
-.ctr-div {
-  margin: 10px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.ctr-div span {
-  margin: 0 4px;
-  font-weight: 400;
-}
-
-.ctr-div span.active {
-  color: var(--primary);
-}
-
-.clear-btn {
-  background-color: #8282ff;
-  color: var(--white);
-  padding: 8px 12px;
-  outline: none;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.todos-list {
-  margin-top: 15px;
-  padding: 0;
-}
-
-.todo-items {
-  list-style: none;
-  margin: 15px 0;
-  padding: 10px;
-  border-bottom: 1px solid var(--primary);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.todo-items span {
-  font-weight: 500;
-  margin-left: 8px;
-}
-
-.todos-list div {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.todos-list div i {
-  cursor: pointer;
-}
-
-.edit-ic {
-  color: var(--primary);
-}
-
-.delete-ic {
-  color: var(--danger);
-}
-
-.todo-txt.completed {
-  text-decoration: line-through;
-  color: gray;
-}
-
-/* Mobile View - Small Screens */
-@media (max-width: 600px) {
   .todo-div {
-    width: 90%; /* Take up 90% of the screen width */
-    max-width: none; /* Remove max-width restriction */
+    background-color: var(--white);
+    padding: 10px 20px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 400px; /* Maximum width for large screens */
+    max-height: 90vh; /* Limit the height to avoid overflowing */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+  }
+
+  .task-input {
+    height: 40px;
+  }
+
+  .task-input input {
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--primary);
+    outline: none;
+    background-color: #e7f9f0;
+    border-radius: 4px;
+    padding: 0 0 0 20px;
   }
 
   .ctr-div {
-    flex-direction: column;
-    align-items: flex-start;
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .ctr-div span {
-    margin-bottom: 8px; /* Space between filter options */
+    margin: 0 4px;
+    font-weight: 400;
+  }
+
+  .ctr-div span.active {
+    color: var(--primary);
   }
 
   .clear-btn {
-    margin-top: 10px; /* Space between filter and clear button */
+    background-color: #8282ff;
+    color: var(--white);
+    padding: 8px 12px;
+    outline: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
   }
-}
-
-/* Tablet View - Medium Screens */
-@media (max-width: 900px) {
-  .todo-div {
-    width: 85%; /* Slightly larger width for tablets */
+  .todos-list {
+    margin-top: 15px;
+    padding: 0;
   }
 
-  .ctr-div {
-    flex-direction: row;
+  .todo-items {
+    list-style: none;
+    margin: 15px 0;
+    padding: 10px;
+    border-bottom: 1px solid var(--primary);
+    display: flex;
     justify-content: space-between;
+    align-items: center;
   }
-}
 
-/* Desktop View - Large Screens */
-@media (min-width: 1024px) {
-  .todo-div {
-    width: 40%; /* More narrow container for larger screens */
+  .todo-items span {
+    font-weight: 500;
+    margin-left: 8px;
   }
-}
 
-/* Extra-Large Screens (XL) */
-@media (min-width: 1280px) {
-  .todo-div {
-    width: 30%; /* Even narrower container for very large screens */
+  .todos-list div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-}
+
+  .todos-list div i {
+    cursor: pointer;
+  }
+
+  .edit-ic {
+    color: var(--primary);
+  }
+
+  .delete-ic {
+    color: var(--danger);
+  }
+
+  .todo-txt.completed {
+    text-decoration: line-through;
+    color: gray;
+  }
+
+  /* Mobile View - Small Screens */
+  @media (max-width: 600px) {
+    .todo-div {
+      width: 90%; /* Take up 90% of the screen width */
+      max-width: none; /* Remove max-width restriction */
+    }
+
+    .ctr-div {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .ctr-div span {
+      margin-bottom: 8px; /* Space between filter options */
+    }
+
+    .clear-btn {
+      margin-top: 10px; /* Space between filter and clear button */
+    }
+  }
+
+  /* Tablet View - Medium Screens */
+  @media (max-width: 900px) {
+    .todo-div {
+      width: 85%; /* Slightly larger width for tablets */
+    }
+
+    .ctr-div {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+
+  /* Desktop View - Large Screens */
+  @media (min-width: 1024px) {
+    .todo-div {
+      width: 40%; /* More narrow container for larger screens */
+    }
+  }
+
+  /* Extra-Large Screens (XL) */
+  @media (min-width: 1280px) {
+    .todo-div {
+      width: 30%; /* Even narrower container for very large screens */
+    }
+  }
