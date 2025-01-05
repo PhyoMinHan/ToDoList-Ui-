@@ -2,258 +2,219 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Todo List</title>
-  <link rel="stylesheet" href="../output.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <style>
-    .active {
-      color: #2563eb;
-      border-bottom: 2px solid #2563eb;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="../output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .active {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+        }
+    </style>
 </head>
 
 <body class="h-screen flex items-center justify-center" style="background: #8282ff;">
-  <section class="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md h-[80vh] overflow-y-auto">
-    <div class="mb-4">
-      <input type="text" placeholder="Add A New Task" style="background-color: #e7f9f0;"
-        class="task-input w-full h-10 px-4 border border-blue-500 rounded outline-none">
+    <section class="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md h-[80vh] overflow-y-auto">
+        <div class="mb-4">
+            <input type="text" placeholder="Add A New Task" style="background-color: #e7f9f0;"
+                class="task-input w-full h-10 px-4 border border-blue-500 rounded outline-none">
+        </div>
+        <div class="flex justify-between items-center mb-4 ctr-div">
+            <div class="flex space-x-2">
+                <span class="cursor-pointer text-gray-700 font-medium active" data-filter="all">All</span>
+                <span class="cursor-pointer text-gray-700 font-medium" data-filter="pending">Pending</span>
+                <span class="cursor-pointer text-gray-700 font-medium" data-filter="completed">Completed</span>
+            </div>
+            <div class="bg-blue-500 flex gap-x-1 text-white px-2 py-2 rounded count-list">
+                Done<div class="total"></div>/<div class="complete"></div>
+            </div>
+        </div>
+        <hr class="border-blue-300 mb-4">
+        <ul class="todos-list space-y-4"></ul>
+    </section>
+    <!-- Delete Confirmation Modal for individual task -->
+    <div id="deleteModal" style="display: none;"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 class="text-lg font-semibold mb-4">Are you sure to delete?</h2>
+            <div class="flex justify-end space-x-4">
+                <button id="cancelBtn"
+                    class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+                <button id="confirmDeleteBtn"
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</button>
+            </div>
+        </div>
     </div>
-    <div class="flex justify-between items-center mb-4 ctr-div">
-      <div class="flex space-x-2">
-        <span class="cursor-pointer text-gray-700 font-medium active" data-filter="all">All</span>
-        <span class="cursor-pointer text-gray-700 font-medium" data-filter="pending">Pending</span>
-        <span class="cursor-pointer text-gray-700 font-medium" data-filter="completed">Completed</span>
-      </div>
-      <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 clear-btn">Clear All</button>
-    </div>
-    <hr class="border-blue-300 mb-4">
-    <ul class="todos-list space-y-4"></ul>
-  </section>
 
-  <!-- Delete Confirmation Modal for individual task -->
-  <div id="deleteModal" style="display: none;"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-      <h2 class="text-lg font-semibold mb-4">Are you sure to delete?</h2>
-      <div class="flex justify-end space-x-4">
-        <button id="cancelBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
-        <button id="confirmDeleteBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</button>
-      </div>
-    </div>
-  </div>
+    <script>
 
-  <!-- Clear All Confirmation Modal -->
-  <div id="clearAllModal" style="display: none;"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-      <h2 class="text-lg font-semibold mb-4">Are you sure to clear all tasks?</h2>
-      <div class="flex justify-end space-x-4">
-        <button id="cancelClearAllBtn"
-          class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
-        <button id="confirmClearAllBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Clear
-          All</button>
-      </div>
-    </div>
-  </div>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const userTaskInput = document.querySelector(".task-input");
-      const todosList = document.querySelector(".todos-list");
-      const filterButtons = document.querySelectorAll(".ctr-div span");
-      const clearButton = document.querySelector(".clear-btn");
+        const userTaskInput = document.querySelector(".task-input");
+        const todosList = document.querySelector(".todos-list");
+        const filterButtons = document.querySelectorAll(".ctr-div span");
+        const countList = document.querySelector('.count-list');
 
-      const deleteModal = document.getElementById("deleteModal");
-      const cancelBtn = document.getElementById("cancelBtn");
-      const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+        let todos = JSON.parse(localStorage.getItem("alltodo-list")) || [];
+        console.log(todos);
+        function renderTodos(filter = "all") {
+            todosList.innerHTML = "";
+            if (todos.length === 0) {
+                const li = document.createElement("li");
+                li.className = "text-center text-gray-500 mt-20";
+                li.innerHTML = "No tasks available";
+                todosList.appendChild(li);
+                updateTaskCounter(); // Update counter even when the list is empty
+                return;
+            }
 
-      const clearAllModal = document.getElementById("clearAllModal");
-      const cancelClearAllBtn = document.getElementById("cancelClearAllBtn");
-      const confirmClearAllBtn = document.getElementById("confirmClearAllBtn");
+            todos.forEach((todo, index) => {
+                if (filter === "completed" && todo.status !== "completed") return;
+                if (filter === "pending" && todo.status !== "pending") return;
 
-      let todos = JSON.parse(localStorage.getItem("todos-list")) || [];
-      let deleteIndex = null;
-
-      // Render tasks based on filter
-      function renderTodos(filter = "all") {
-        todosList.innerHTML = ""; // Clear the list first
-
-        // Check if there are no tasks
-        if (todos.length === 0) {
-          const li = document.createElement("li");
-          li.className = "text-center text-gray-500 mt-20"; // Styling the empty message
-          li.innerHTML = "No tasks available."; // The message to display
-          todosList.appendChild(li);
-          return; // Exit the function if no tasks
-        }
-
-        // Render tasks if there are any
-        todos.forEach((todo, index) => {
-          if (filter === "completed" && todo.status !== "completed") return;
-          if (filter === "pending" && todo.status !== "pending") return;
-
-          const li = document.createElement("li");
-          li.className = "flex justify-between items-center border-b pb-2";
-
-          li.innerHTML = `
-          <label class="flex items-center space-x-2">
-            <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">
-            <span class="${todo.status === "completed" ? "line-through text-gray-500" : "text-gray-700"}">${todo.task}</span>
-          </label>
-          <div class="flex space-x-2">
-            <i class="fa-solid fa-pen-to-square text-blue-500 cursor-pointer" data-index="${index}"></i>
-            <i class="fa-solid fa-trash text-red-500 cursor-pointer" data-index="${index}"></i>
-          </div>
+                const li = document.createElement("li");
+                li.className = "flex justify-between items-center border-b pb-2";
+                li.innerHTML = `
+            <label class="flex items-center space-x-2">
+                <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">  
+               <span class="${todo.status === 'completed' ? 'line-through text-gray-500 break-words' : 'text-gray-700 break-words'}" style="white-space: normal; word-break: break-word;">${todo.task}
+            </span>
+            </label>
+            <div class="flex space-x-2">
+                <button class="edit-task ps-2"> 
+                    <i class="fa-solid fa-pen-to-square text-blue-500 cursor-pointer" data-index="${index}"></i>
+                </button>
+                <button class="delete-task">
+                    <i class="fa-solid fa-trash text-red-500 cursor-pointer" data-index="${index}"></i>
+                </button>
+            </div>     
         `;
-          todosList.appendChild(li);
-        });
-      }
-      userTaskInput.addEventListener("keyup", (event) => {
-        const userInput = userTaskInput.value.trim();
-        const editIndex = userTaskInput.dataset.editIndex;
+                todosList.appendChild(li);
+            });
 
-        if (event.key === "Enter" && userInput) {
-          if (editIndex !== undefined) {
-            todos[editIndex].task = userInput;
-
-            // Reset opacity after editing
-            const todoItem = todosList.querySelector(`li:nth-child(${parseInt(editIndex) + 1})`);
-            const todoText = todoItem.querySelector("span");
-            todoText.style.opacity = "1";
-
-            delete userTaskInput.dataset.editIndex;  // Reset the editIndex
-            enableControls();
-          } else {
-            todos.push({ task: userInput, status: "pending" });
-          }
-
-          localStorage.setItem("todos-list", JSON.stringify(todos));
-          userTaskInput.value = "";
-
-          // Preserve the current filter
-          const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
-          renderTodos(activeFilter);
-        }
-      });
-
-      // Handle checkbox change (mark task as completed or pending)
-      todosList.addEventListener("change", (event) => {
-        if (event.target.type === "checkbox") {
-          const index = event.target.dataset.index;
-          todos[index].status = event.target.checked ? "completed" : "pending";
-          localStorage.setItem("todos-list", JSON.stringify(todos));
-
-          const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
-          renderTodos(activeFilter);
-        }
-      });
-
-      // Handle task edit and delete
-      todosList.addEventListener("click", (event) => {
-        if (event.target.classList.contains("fa-pen-to-square")) {
-          const index = event.target.dataset.index;
-          userTaskInput.value = todos[index].task;
-          userTaskInput.focus();
-          userTaskInput.dataset.editIndex = index;
-          disableControls();
-
-          // Reduce opacity of the text
-          const todoItem = event.target.closest("li");
-          const todoText = todoItem.querySelector("span");
-          todoText.style.opacity = "0.5";
+            updateTaskCounter(); // Update the task counter after rendering
         }
 
-        if (event.target.classList.contains("fa-trash")) {
-          deleteIndex = event.target.dataset.index;
-          deleteModal.style.display = "flex";
+        function updateTaskCounter() {
+            const totalTasks = todos.length; // Get the total number of tasks
+            const completedTasks = todos.filter(todo => todo.status === "completed").length; // Count completed tasks
+            countList.querySelector(".complete").innerHTML = completedTasks; // Update "Done" count
+            countList.querySelector(".total").innerHTML = totalTasks; // Update "Total" count
         }
-      });
 
-      // Handle delete confirmation
-      cancelBtn.addEventListener("click", () => {
-        deleteModal.style.display = "none";
-        deleteIndex = null;
-      });
-
-      confirmDeleteBtn.addEventListener("click", () => {
-        if (deleteIndex !== null) {
-          todos.splice(deleteIndex, 1);
-          localStorage.setItem("todos-list", JSON.stringify(todos));
-          const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
-          renderTodos(activeFilter);
-          deleteIndex = null;
-        }
-        deleteModal.style.display = "none";
-      });
-
-      // Handle clear all tasks 
-      clearButton.addEventListener("click", () => {
-        clearAllModal.style.display = "flex";  // Show Clear All confirmation modal
-      });
-
-      cancelClearAllBtn.addEventListener("click", () => {
-        clearAllModal.style.display = "none";  // Close modal
-      });
-
-      confirmClearAllBtn.addEventListener("click", () => {
-        todos = [];  // Clear all tasks
-        localStorage.setItem("todos-list", JSON.stringify(todos));
-        renderTodos();  // Re-render empty list
-        clearAllModal.style.display = "none";  // Close modal
-      });
-
-      // Handle filter change
-      filterButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document.querySelector(".ctr-div span.active").classList.remove("active");
-          btn.classList.add("active");
-
-          // Preserve the current filter and re-render
-          const activeFilter = btn.dataset.filter;
-          renderTodos(activeFilter);
-        });
-      });
-
-      // Disable controls (checkboxes, delete buttons, and filter buttons)
-      function disableControls() {
-        todosList.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
-          checkbox.disabled = true;
-        });
-        todosList.querySelectorAll(".fa-trash").forEach((icon) => {
-          icon.style.pointerEvents = "none";
-          icon.style.opacity = "0.5";
+        userTaskInput.addEventListener("keyup", (event) => {
+            const userInput = userTaskInput.value.trim();
+            if (event.key === "Enter" && userInput) {
+                todos.push({ task: userInput, status: "pending" });
+                console.log(todos);
+                localStorage.setItem("alltodo-list", JSON.stringify(todos));
+                userTaskInput.value = "";
+                // Preserve the current filter     
+                const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
+                renderTodos(activeFilter);
+                // }
+            }
         });
 
+        ///delete function with confirmation modal
+        todosList.addEventListener("click", (event) => {
+            if (event.target.closest(".delete-task")) {
+                const index = event.target.closest(".delete-task").querySelector("i").dataset.index;
+
+                // Show the delete confirmation modal
+                const deleteModal = document.getElementById("deleteModal");
+                deleteModal.style.display = "flex";
+
+                // Cancel button event
+                const cancelBtn = document.getElementById("cancelBtn");
+                cancelBtn.addEventListener("click", () => {
+                    deleteModal.style.display = "none"; // Hide the modal
+                });
+
+                // Confirm delete button event
+                const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+                confirmDeleteBtn.onclick = () => {
+                    todos.splice(index, 1); // Remove task from array
+                    localStorage.setItem("alltodo-list", JSON.stringify(todos)); // Update localStorage
+                    const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
+                    renderTodos(activeFilter); // Re-render the list
+                    deleteModal.style.display = "none"; // Hide the modal
+                };
+            }
+        });
+
+        // Event delegation for the edit button
+        todosList.addEventListener("click", (event) => {
+            if (event.target.closest(".edit-task")) {
+                const index = event.target.closest(".edit-task").querySelector("i").dataset.index;
+                const todo = todos[index];  // Get the task to be edited
+                // Create an input field with the current task value
+                const input = document.createElement("input");
+                input.type = "text";
+                input.value = todo.task;  // Set the current task as the input value
+                input.classList.add("edit-input", "w-full", "px-4", "py-2", "outline-none", "border", "border-blue-500", "rounded");
+
+                // Replace the task text with the input field
+                const taskSpan = event.target.closest("li").querySelector("span");
+                taskSpan.replaceWith(input);
+                // Focus on the input field for immediate editing
+                input.focus();
+                // Handle the blur event (when the user finishes editing)
+                input.addEventListener("blur", () => {
+                    const updatedTask = input.value.trim();
+                    if (updatedTask) {
+                        // Update the task in the todos array
+                        todos[index].task = updatedTask;
+                        localStorage.setItem("alltodo-list", JSON.stringify(todos));  // Save to localStorage
+                    }
+                    // Re-render the todos list
+                    const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
+                    renderTodos(activeFilter);
+                });
+
+                // Handle the Enter key to save the edit
+                input.addEventListener("keyup", (event) => {
+                    if (event.key === "Enter") {
+                        const updatedTask = input.value.trim();
+                        if (updatedTask) {
+                            todos[index].task = updatedTask;
+                            localStorage.setItem("alltodo-list", JSON.stringify(todos));  // Save to localStorage
+                        }
+                        const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
+                        renderTodos(activeFilter);
+                    }
+                });
+            }
+        });
+
+        //All pending completed change taskbar
         filterButtons.forEach((btn) => {
-          btn.style.pointerEvents = "none";
-          btn.style.opacity = "0.5";
-        });
-      }
 
-      // Enable controls (checkboxes, delete buttons, and filter buttons)
-      function enableControls() {
-        todosList.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
-          checkbox.disabled = false;
-        });
-        todosList.querySelectorAll(".fa-trash").forEach((icon) => {
-          icon.style.pointerEvents = "auto";
-          icon.style.opacity = "1";
+            btn.addEventListener("click", () => {
+                document.querySelector(".ctr-div span.active").classList.remove("active");
+                btn.classList.add("active");
+
+                // Preserve the current filter and re-render
+                const activeFilter = btn.dataset.filter;
+                renderTodos(activeFilter);
+            });
         });
 
-        filterButtons.forEach((btn) => {
-          btn.style.pointerEvents = "auto";
-          btn.style.opacity = "1";
-        });
-      }
+        todosList.addEventListener("change", (event) => {
+            if (event.target.type === "checkbox") {
+                const index = event.target.dataset.index;
+                console.log(index);
+                todos[index].status = event.target.checked ? "completed" : "pending";
+                localStorage.setItem("alltodo-list", JSON.stringify(todos));
+                const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
+                renderTodos(activeFilter);
+            }   
 
-      // Initial rendering
-      renderTodos();
-    });
-  </script>
+        });
+        renderTodos();
+    </script>
 </body>
 
 </html>
