@@ -78,8 +78,8 @@
                 li.className = "flex justify-between items-center border-b pb-2";
                 li.innerHTML = `
             <label class="flex items-center space-x-2">
-                <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-4">  
-               <span class="${todo.status === 'completed' ? 'line-through text-gray-500 break-words' : 'text-gray-700 break-words'}" style="white-space: normal; word-break: break-word;">${todo.task}
+                <input type="checkbox" ${todo.status === "completed" ? "checked" : ""} data-index="${index}" class="h-4 w-3">  
+               <span class="${todo.status === 'completed' ? 'line-through text-gray-500 break-words' : 'text-gray-700 break-words'} font-semibold" style="white-space: normal; word-break: break-word;">${todo.task}
             </span>
             </label>
             <div class="flex space-x-2">
@@ -114,7 +114,6 @@
                 // Preserve the current filter     
                 const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
                 renderTodos(activeFilter);
-                // }
             }
         });
 
@@ -210,7 +209,7 @@
                 localStorage.setItem("alltodo-list", JSON.stringify(todos));
                 const activeFilter = document.querySelector(".ctr-div span.active").dataset.filter;
                 renderTodos(activeFilter);
-            }   
+            }
 
         });
         renderTodos();
